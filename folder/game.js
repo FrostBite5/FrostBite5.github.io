@@ -2,44 +2,80 @@
 
 var player = {
   errors: 10, //current errors
-  eps: 0, //errors per second
-  firstCost: 10,
-  secondCost: 100,
-  thirdCost: 1000,
-  fourthCost: 10000, //prices adjustable
-  firstAmount: 0,
-  secondAmount: 0,
-  thirdAmount: 0,
-  fourthAmount: 0,
+  compCost: [10,100,1000,10000,1e6,1e8,1e10,1e13,1e16],
+  compAmount: [0,0,0,0,0,0,0,0,0],
+  compPow: [1,10,100,1000,1e4,1e5,1e6,1e7,1e8],
+  prestige1: 0,
+  prestige2: 0,
   story: 0
 }
 const TIER_NAMES = ['first','second','third', 'fourth', 'fifth', 'sixth', 'seventh', 'eighth', 'ninth']; // can add more if more gens/story elements, cuz that uses this too
-var costMult=[2,3,5,8,13,21,34,55,89]
+const ROMAN_NUMERALS = ['I','II','III','IV','V','VI','VII','VIII','IX']
+const costMult=[2,3,5,8,13,21,34,55,89]
 
-
-function buyGen(tier) {
-  var level = TIER_NAMES[tier];
-  if (player.errors>=player[level+"Cost"]) {
-	player[level+"Amount"]+=1
-    player.errors-=player[level+"Cost"]
-	player[level+"Cost"]*=costMult[tier]
-	if (tier==0&&player.story==0) {
-		createStoryElement("Pancakes is ready!")
-		player.story+=1
-	}
-	if (tier==1&&player.story==1) {
-		createStoryElement("But NOPE! No pancakes for you. Too many console errors.")
-		player.story+=1
-	}
-	if (tier==2&&player.story==2) {
-		createStoryElement("Nice! A Tier III Computer. Well deserved.")
-		player.story+=1
-	}
+function changeMults() {
+  if (player.buyMult == 1) {
+	  player.buyMult = 5;
+  } else if (player.buyMult == 5) {
+    player.buyMult = 10;
+  } else if (player.buyMult == 10) {
+    player.buyMult = 25;
+  } else if (player.buyMult == 25) {
+    player.buyMult = 50;
+  } else if (player.buyMult == 50) {
+    player.buyMult = 100;
+  } else if (player.buyMult == 100) {
+    player.buyMult = 1;
   }
 }
 
+function buyGen(tier) {
+  if (player.errors>=player.compCost[tier]) {
+	  player.compAmount[tier]++
+    player.errors-=player.compCost[tier]
+    player.compCost[tier]*=costMult[tier]
+
+    switch (tier) {
+      case 0: if (player.story==0) {
+        createStoryElement("Pancakes is ready!")
+        player.story++
+      } break;
+      case 1: if (player.story==1) {
+        createStoryElement("But NOPE! No pancakes for you. Too many console errors.")
+        player.story++
+      } break;
+      case 2: if (player.story==2) {
+        createStoryElement("Nice! A Tier III Computer. Well deserved.")
+        player.story++
+      } break;
+    }
+
+    display()
+  }
+}
+
+function prestige(tier) {
+  switch(tier) { //don't allow prestiging until you match reqs
+    case 1: if (player.compAmount[player.prestige1] < 10) return; break;
+  }
+  player.errors = 10;
+  player.compCost = [10,100,1000,10000,1e6,1e8,1e10,1e13,1e16];
+  player.compAmount = [0,0,0,0,0,0,0,0,0];
+  player.compPow = [1,10,100,1000,1e4,1e5,1e6,1e7,1e8];
+  if (tier==1) {
+    player.prestige1++;
+    for (let i=0;i<9;i++) player.compPow[i] *= Math.pow(1.5,player.prestige1);
+    document.getElementById("prestige1Gen").innerHTML = ROMAN_NUMERALS[player.prestige1]
+  } else {
+    player.prestige1 = 0;
+    document.getElementById("prestige1Gen").innerHTML = 'I'
+    if (tier==2) {
+      player.prestige2++;
+      document.getElementById("prestige2Gen").innerHTML = ROMAN_NUMERALS[player.prestige2+3]
+    }
+  }
+}
 function createStoryElement(message) {
-  
   document.getElementById("fifthStory").innerHTML = document.getElementById("fourthStory").innerHTML;
   document.getElementById("fourthStory").innerHTML = document.getElementById("thirdStory").innerHTML;
   document.getElementById("thirdStory").innerHTML = document.getElementById("secondStory").innerHTML;
@@ -49,26 +85,25 @@ function createStoryElement(message) {
 }
 
 function getEPS() {
-  player.eps = (player.firstAmount * 1)+(player.secondAmount * 10)+(player.thirdAmount * 100)+(player.fourthAmount*1000); // can change base amounts of how much they produce, or change it to just be firsts cuz AD elements
+  let ret = 0;
+  for (let i=0;i<9;i++) ret += player.compAmount[i]*player.compPow[i]
+  return ret;
 }
 
 function display() {
-   getEPS();
-  
   document.getElementById("errors").innerHTML = player.errors; //this is the base, except in the parentheses add the HTML tag of the thing you're changing
-  document.getElementById("eps").innerHTML = player.eps;
-  document.getElementById("cop1").innerHTML = "Buy a tier I computer. Cost: " + player.firstCost + " (" + player.firstAmount + ")";
-  document.getElementById("cop2").innerHTML = "Buy a tier II computer. Cost: " + player.secondCost + " (" + player.secondAmount + ")";
-  document.getElementById("cop3").innerHTML = "Buy a tier III computer. Cost: " + player.thirdCost + " (" + player.thirdAmount + ")";
-  document.getElementById("cop4").innerHTML = "Buy a tier IV computer. Cost: " + player.fourthCost + " (" + player.fourthAmount + ")";
+  document.getElementById("eps").innerHTML = getEPS();
+  for (let i=0;i<4;i++) document.getElementById("cop"+(i+1)).innerHTML = "Buy a tier "+ROMAN_NUMERALS[i]+" computer. Cost: " + player.compCost[i] + " (" + player.compAmount[i] + ")";
+  //document.getElementById("buyMult").innerHTML = player.buyMult + "x";
 }
 
 function increaseErrors() {
-  getEPS()
-  player.errors+=player.eps;
+  player.errors+=getEPS();
   display()
 }
 
-setInterval(function(){
-  increaseErrors();
-},1000);
+/*function save() {
+
+}*/
+
+setInterval(increaseErrors,1000);

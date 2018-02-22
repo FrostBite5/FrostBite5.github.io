@@ -541,10 +541,4 @@ function gameInit() {
 	},0)
 	setInterval(save,10000);
 }
-function maxAll() {
-var buyTiers=[]
-for (i=1;i<((player.currentChallenge==3)?10:11);i++) {
-if (isWorthIt(i)) {
-buyTiers.push(i)
 
-}

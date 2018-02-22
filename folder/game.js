@@ -12,7 +12,7 @@ player = {
   time: 0, //total time displayed in stats
   notation: 0, //notation setting, see options
   version: 1, //very important
-  build: 4 //used for us to communicate commits, helps a lot
+  build: 5 //used for us to communicate commits, helps a lot
 }
 tab='computers'
 oldtab=tab
@@ -540,4 +540,11 @@ function gameInit() {
 		}
 	},0)
 	setInterval(save,10000);
+}
+function maxAll() {
+var buyTiers=[]
+for (i=1;i<((player.currentChallenge==3)?10:11);i++) {
+if (isWorthIt(i)) {
+buyTiers.push(i)
+
 }

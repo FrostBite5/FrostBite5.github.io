@@ -632,7 +632,7 @@ window.addEventListener('keydown', function(event) {
 		    
         case 84: // T
 		    if (shiftDown) buyGenUpgrade(); 
-        else  maxGenUpgrades();
+        else  maxGenUpgrade();
         break;
     }    
 }, false);

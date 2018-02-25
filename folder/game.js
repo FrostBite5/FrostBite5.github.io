@@ -617,8 +617,6 @@ function updateStory() {
     }
 }
 
-
-
 function gameInit() {
 	setupRoman()
 	load(localStorage.getItem('errorSave'))

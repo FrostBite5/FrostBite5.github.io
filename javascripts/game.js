@@ -588,7 +588,7 @@ function gameTick() {
 		  hideElement('statsPrestige4')
 	  }
   }
-  if player.errors.gte(Number.MAX_VALUE) newStory(24)
+  if (player.errors.gte(Number.MAX_VALUE)) newStory(24)
 }
 
 function save() {
